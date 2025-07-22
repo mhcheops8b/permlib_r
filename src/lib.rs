@@ -89,6 +89,46 @@ pub fn next_perm<T:Copy+PartialOrd>(a:&mut[T], len:usize) -> bool
     return true;
 }
 
+pub fn next_perm_from_len<T:Copy+PartialOrd>(a:&mut[T], from: usize, len:usize) -> Option<bool>
+{
+    // there no next_perm on empty array
+    if len == 0 {
+        return Some(false);
+    }
+
+    // check bounds
+    if from + len > a.len() {
+        eprintln!("Error: from + len is larger than the lenght of array."); 
+        return None;
+    }
+
+    let a_size = from + len - 1; //a.len() - 1;
+    let mut i:isize = a_size as isize;
+    while (i - 1) >= from as isize && a[(i-1) as usize] > a[i as usize]
+    {
+        i-=1;
+    }
+
+    if (i-1)  < from as isize
+    {
+        return Some(false);
+    }
+
+    let mut j:usize = a_size;
+
+    while a[(i-1) as usize] > a[j] {
+        j-=1
+    }
+    
+    swap(a, (i-1) as usize, j);
+
+    reverse(a, i as usize, a_size);
+    
+    return Some(true);
+}
+
+
+
 pub fn next_perm_vec<T:Copy+PartialOrd>(a:&mut Vec<T>, len:usize) -> bool
 {
     // there no next_perm on empty array
@@ -121,7 +161,6 @@ pub fn next_perm_vec<T:Copy+PartialOrd>(a:&mut Vec<T>, len:usize) -> bool
     return true;
 }
 
-#[allow(dead_code)]
 fn prev_perm<T:Copy+PartialOrd>(a:&mut[T], len:usize) -> bool
 {
     // there no prev_perm on empty array
@@ -154,6 +193,47 @@ fn prev_perm<T:Copy+PartialOrd>(a:&mut[T], len:usize) -> bool
     
     return true;
 }
+
+pub fn prev_perm_from_len<T:Copy+PartialOrd>(a:&mut[T], from: usize, len:usize) -> Option<bool>
+{
+    // there no next_perm on empty array
+    if len == 0 {
+        return Some(false);
+    }
+
+    // check bounds
+    if from + len > a.len() {
+        eprintln!("Error: from + len is larger than the lenght of array."); 
+        return None;
+    }
+
+    let a_size = from + len - 1; //a.len() - 1;
+    let mut i:isize = a_size as isize;
+    while (i - 1) >= from as isize && a[(i-1) as usize] < a[i as usize]
+    {
+        i-=1;
+    }
+
+    if (i-1)  < from as isize
+    {
+        return Some(false);
+    }
+
+    let mut j:usize = a_size;
+
+    while a[(i-1) as usize] < a[j] {
+        j-=1
+    }
+    
+    swap(a, (i-1) as usize, j);
+
+    reverse(a, i as usize, a_size);
+    
+    return Some(true);
+}
+
+
+
 
 #[cfg(test)]
 mod tests {
@@ -200,7 +280,7 @@ mod tests {
         assert_eq!(p, vec![0,2,1,4]);
     }
 
-       #[test]
+    #[test]
     fn test_prev_perm_begin() {
         let mut p = vec![0,1,2,4];
 
@@ -208,5 +288,77 @@ mod tests {
 
         assert_eq!(b, false);
 
+    }
+
+    #[test]
+    fn test_next_perm2() {
+        let mut p = vec![0,2,4,1];
+
+        let b = next_perm(&mut p, 3);
+
+        assert_eq!(b, true);
+
+        assert_eq!(p, vec![0,4,2,1]);
+
+    }
+
+    #[test]
+    fn test_next_perm_from_len1() {
+        let mut p = vec![0,2,4,1];
+
+        let b = next_perm_from_len(&mut p, 2, 2);
+
+        assert_eq!(b, Some(false));
+    }
+
+    #[test]
+    fn test_next_perm_from_len2() {
+        let mut p = vec![0,2,4,1];
+
+        let b = next_perm_from_len(&mut p, 2, 3);
+
+        assert_eq!(b, None);
+    }
+
+    #[test]
+    fn test_next_perm_from_len3() {
+        let mut p = vec![0,2,4,1,4,2,3,4];
+
+        let b = next_perm_from_len(&mut p, 4, 3);
+
+        assert_eq!(b, Some(true));
+
+        assert_eq!(p, vec![0,2,4,1,4,3,2,4]);
+    }
+
+        #[test]
+    fn test_prev_perm_from_len1() {
+        let mut p = vec![0,2,4,1];
+
+        let b = prev_perm_from_len(&mut p, 2, 2);
+
+        assert_eq!(b, Some(true));
+
+        assert_eq!(p, vec![0,2,1,4]);
+    }
+
+    #[test]
+    fn test_prev_perm_from_len2() {
+        let mut p = vec![0,2,4,1];
+
+        let b = prev_perm_from_len(&mut p, 2, 3);
+
+        assert_eq!(b, None);
+    }
+
+    #[test]
+    fn test_prev_perm_from_len3() {
+        let mut p = vec![0,2,4,1,4,2,3,4];
+
+        let b = prev_perm_from_len(&mut p, 4, 3);
+
+        assert_eq!(b, Some(true));
+
+        assert_eq!(p, vec![0,2,4,1,3,4,2,4]);
     }
 }
